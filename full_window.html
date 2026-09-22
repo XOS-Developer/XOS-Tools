@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toolbox</title>
+<style>
+  :root{
+    --bg:#11141b;
+    --panel:#181c26;
+    --panel-2:#1f2430;
+    --border:#2a3040;
+    --text:#e7eaf1;
+    --text-dim:#8a93a6;
+    --accent:#5781FF;
+    --accent-text:#20160a;
+    --accent-2:#5781FF;
+    --danger:#f1706a;
+    --radius:10px;
+    --radius-lg:16px;
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    --mono:"Cascadia Code","Consolas","SFMono-Regular",Menlo,monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#e9ebf0;
+    --panel:#fbfbfd;
+    --panel-2:#f0f1f5;
+    --border:#d6d9e1;
+    --text:#1b1f27;
+    --text-dim:#6b7180;
+    --accent:#5781FF;
+    --accent-text:#fffaf0;
+    --accent-2:#5781FF;
+    --danger:#c94a44;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(242,184,75,0.07), transparent 45%),
+      radial-gradient(circle at 80% 85%, rgba(79,209,197,0.07), transparent 45%),
+      var(--bg);
+    font-family:var(--font);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    padding:20px;
+  }
+  button{font-family:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  .app-shell{
+    width:1800px;
+    height:900px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    box-shadow:0 20px 50px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    transition:box-shadow .2s ease;
+  }
+
+  .app-header{
+    height:46px;
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 10px 0 14px;
+    background:var(--panel-2);
+    border-bottom:1px solid var(--border);
+    user-select:none;
+  }
+  .app-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13.5px;
+    font-weight:600;
+    letter-spacing:.2px;
+    color:var(--text);
+  }
+  .app-title svg{color:var(--accent);}
+  .header-actions{display:flex;align-items:center;gap:4px;}
+  .icon-btn{
+    width:30px;height:30px;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;
+    border:1px solid transparent;
+    border-radius:8px;
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .icon-btn:hover{background:var(--panel);color:var(--text);}
+  .icon-btn.on{
+    color:var(--accent-text);
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+
+  .app-body{flex:1;display:flex;min-height:0;}
+
+  .sidebar{
+    flex:0 0 52px;
+    background:var(--panel-2);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:10px 0;
+    gap:4px;
+    overflow-y:auto;
+  }
+  .nav-btn{
+    width:38px;height:38px;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;
+    border:none;
+    border-radius:9px;
+    color:var(--text-dim);
+    cursor:pointer;
+    position:relative;
+    flex:0 0 auto;
+    transition:background .15s ease,color .15s ease;
+  }
+  .nav-btn:hover{background:var(--panel);color:var(--text);}
+  .nav-btn.active{background:var(--accent);color:var(--accent-text);}
+  .nav-btn svg{width:18px;height:18px;}
+
+  .content{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .tool-pane{
+    display:none;
+    flex:1;
+    min-height:0;
+    flex-direction:column;
+    padding:14px;
+    overflow-y:auto;
+  }
+  .tool-pane.active{display:flex;}
+
+  .pane-header{margin-bottom:10px;flex:0 0 auto;}
+  .pane-header h2{margin:0;font-size:14.5px;font-weight:600;}
+  .pane-subheader{font-size:11.5px;color:var(--text-dim);margin:12px 0 6px;text-transform:none;}
+
+  textarea, input[type=text], select{
+    font-family:inherit;
+    color:var(--text);
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:13px;
+    outline:none;
+  }
+  textarea:focus, input[type=text]:focus, select:focus{border-color:var(--accent);}
+
+  button.btn-primary, button.btn-small, button.btn-danger, button.btn-link{
+    cursor:pointer;
+    border-radius:8px;
+    font-size:12.5px;
+    padding:7px 12px;
+    border:1px solid var(--border);
+    background:var(--panel-2);
+    color:var(--text);
+    transition:filter .15s ease, background .15s ease;
+  }
+  button.btn-primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600;}
+  button.btn-primary:hover{filter:brightness(1.08);}
+  button.btn-small:hover{background:var(--border);}
+  button.btn-danger{color:var(--danger);}
+  button.btn-danger:hover{background:rgba(241,112,106,0.12);}
+  button.btn-link{background:none;border:none;color:var(--text-dim);text-decoration:underline;padding:6px 2px;align-self:flex-start;}
+  button.btn-link:hover{color:var(--text);}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* ---------- Clipboard ---------- */
+  .clip-capture{display:flex;gap:6px;flex:0 0 auto;margin-bottom:10px;}
+  .clip-capture textarea{flex:1;resize:none;height:34px;min-height:34px;line-height:16px;}
+  .clip-columns{flex:1;min-height:0;display:flex;gap:8px;}
+  .clip-list{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:5px;border:1px solid var(--border);border-radius:8px;padding:6px;background:var(--panel-2);}
+  .clip-item{
+    text-align:left;
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:7px;
+    padding:7px 8px;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    cursor:pointer;
+  }
+  .clip-item:hover{border-color:var(--accent-2);}
+  .clip-item.selected{border-color:var(--accent);background:rgba(242,184,75,0.1);}
+  .clip-empty{color:var(--text-dim);font-size:12px;padding:10px 4px;text-align:center;}
+  .clip-detail{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+  .clip-detail textarea{flex:1;resize:none;}
+  .clip-detail-actions{display:flex;gap:6px;}
+  .clip-detail-actions button{flex:1;}
+
+  /* ---------- Color picker ---------- */
+  .color-preview{
+    height:90px;border-radius:12px;border:1px solid var(--border);
+    background:#4fd1c5;flex:0 0 auto;margin-bottom:12px;
+    background-image:
+      linear-gradient(45deg, rgba(0,0,0,.06) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(0,0,0,.06) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(0,0,0,.06) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(0,0,0,.06) 75%);
+    background-size:16px 16px;
+    background-position:0 0, 0 8px, 8px -8px, -8px 0px;
+  }
+  .color-row{display:flex;gap:8px;margin-bottom:10px;}
+  .color-row #hexInput{flex:1;font-family:var(--mono);letter-spacing:.5px;}
+  .color-row input[type=color]{
+    width:40px;height:38px;padding:2px;border-radius:8px;border:1px solid var(--border);background:var(--panel-2);cursor:pointer;
+  }
+  .color-values{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--text-dim);margin-bottom:10px;}
+  .color-values span{color:var(--text);font-family:var(--mono);}
+  .color-actions{display:flex;gap:8px;}
+  .color-actions button{flex:1;}
+  .color-recent{display:flex;flex-wrap:wrap;gap:6px;}
+  .swatch{
+    width:26px;height:26px;border-radius:6px;border:1px solid var(--border);cursor:pointer;
+  }
+  .swatch:hover{outline:2px solid var(--accent-2);outline-offset:1px;}
+
+  /* ---------- Shortcuts ---------- */
+  .search-input{flex:0 0 auto;margin-bottom:10px;width:100%;}
+  .shortcut-list{flex:1;overflow-y:auto;}
+  .sc-cat{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent-2);margin:12px 0 6px;font-weight:700;}
+  .sc-cat:first-child{margin-top:0;}
+  .sc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 2px;border-bottom:1px dashed var(--border);}
+  .sc-row:last-child{border-bottom:none;}
+  .sc-desc{font-size:12.5px;color:var(--text);}
+  .sc-keys{display:flex;gap:4px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end;}
+  kbd{
+    font-family:var(--mono);
+    font-size:11px;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-bottom-width:2px;
+    padding:2px 6px;
+    border-radius:5px;
+    color:var(--text);
+  }
+  .sc-empty{color:var(--text-dim);font-size:12.5px;text-align:center;padding:20px 0;}
+
+  /* ---------- Notepad ---------- */
+  .notepad-toolbar{display:flex;gap:6px;flex:0 0 auto;margin-bottom:8px;}
+  .notepad-toolbar select{flex:1;min-width:0;}
+  .notepad-toolbar button{flex:0 0 auto;width:32px;padding:6px 0;}
+  .notepad-textarea{flex:1;resize:none;line-height:1.5;}
+  .notepad-footer{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;margin-top:8px;font-size:11.5px;color:var(--text-dim);}
+  .font-controls{display:flex;gap:4px;}
+  .font-controls button{width:24px;height:22px;padding:0;font-size:11px;}
+  .saved-indicator{color:var(--accent-2);opacity:0;transition:opacity .3s ease;}
+  .saved-indicator.show{opacity:1;}
+
+  /* ---------- Extractor ---------- */
+  .drop-zone{
+    flex:0 0 auto;
+    border:1.5px dashed var(--border);
+    border-radius:12px;
+    padding:18px 10px;
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12.5px;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .drop-zone.drag{border-color:var(--accent);background:rgba(242,184,75,0.08);}
+  .drop-zone p{margin:0;}
+  .extract-preview{
+    max-width:100%;max-height:110px;object-fit:contain;
+    border-radius:8px;border:1px solid var(--border);margin-top:10px;align-self:center;
+  }
+  .extract-progress{flex:0 0 auto;margin-top:10px;}
+  .progress-bar{height:6px;border-radius:4px;background:var(--panel-2);overflow:hidden;border:1px solid var(--border);}
+  .progress-fill{height:100%;width:0%;background:var(--accent);transition:width .15s ease;}
+  #progressLabel{font-size:11px;color:var(--text-dim);display:block;margin-top:5px;}
+  .extract-result{flex:1;resize:none;margin-top:10px;min-height:60px;}
+  .extract-actions{display:flex;gap:8px;margin-top:8px;flex:0 0 auto;}
+  .extract-actions button{flex:1;}
+
+  /* ---------- Calculator ---------- */
+  .calc-display{
+    flex:0 0 auto;background:var(--panel-2);border:1px solid var(--border);
+    border-radius:10px;padding:12px 14px;margin-bottom:10px;text-align:right;
+  }
+  .calc-expr{font-family:var(--mono);font-size:12px;color:var(--text-dim);min-height:16px;overflow-x:auto;white-space:nowrap;}
+  .calc-result{font-family:var(--mono);font-size:26px;font-weight:600;margin-top:4px;overflow-x:auto;white-space:nowrap;}
+  .calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex:0 0 auto;}
+  .calc-grid button{
+    padding:25px 0;border-radius:9px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);font-size:14.5px;cursor:pointer;
+  }
+  .calc-grid button:hover{background:var(--border);}
+  .calc-grid button.op{background:var(--panel);color:var(--accent-2);font-weight:600;}
+  .calc-grid button.eq{background:var(--accent);color:var(--accent-text);font-weight:700;}
+  .calc-grid button.eq:hover{filter:brightness(1.08);}
+  .calc-history{
+    margin-top:8px;max-height:100px;overflow-y:auto;
+    border:1px solid var(--border);border-radius:8px;padding:6px;background:var(--panel-2);
+    display:flex;flex-direction:column;gap:4px;
+  }
+  .calc-hist-row{font-family:var(--mono);font-size:11.5px;color:var(--text-dim);padding:4px 6px;border-radius:6px;cursor:pointer;}
+  .calc-hist-row:hover{background:var(--panel);color:var(--text);}
+  .calc-hist-empty{font-size:11.5px;color:var(--text-dim);text-align:center;padding:6px;}
+
+  /* ---------- Calendar ---------- */
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;margin-bottom:8px;}
+  .cal-nav span{font-size:13.5px;font-weight:600;}
+  .cal-nav button{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);cursor:pointer;font-size:14px;}
+  .cal-nav button:hover{background:var(--border);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;flex:0 0 auto;margin-bottom:8px;}
+  .cal-dow{text-align:center;font-size:10px;color:var(--text-dim);padding-bottom:3px;}
+  .cal-day{
+    aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;
+    border-radius:7px;font-size:12px;cursor:pointer;color:var(--text);position:relative;border:1px solid transparent;
+  }
+  .cal-day:hover{background:var(--panel-2);}
+  .cal-day.other{color:var(--text-dim);opacity:.4;}
+  .cal-day.today{border-color:var(--accent-2);font-weight:700;}
+  .cal-day.selected{background:var(--accent);color:var(--accent-text);font-weight:700;}
+  .cal-day .dot{width:4px;height:4px;border-radius:50%;background:var(--accent-2);position:absolute;bottom:3px;}
+  .cal-day.selected .dot{background:var(--accent-text);}
+  .cal-notes{flex:1;min-height:0;display:flex;flex-direction:column;border-top:1px solid var(--border);padding-top:8px;}
+  .cal-selected-date{font-size:12px;color:var(--text-dim);margin-bottom:6px;}
+  .cal-note-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;margin-bottom:8px;}
+  .cal-note-row{display:flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:12px;}
+  .cal-note-row span{flex:1;word-break:break-word;}
+  .cal-note-row button{flex:0 0 auto;background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px;}
+  .cal-note-add{display:flex;gap:6px;flex:0 0 auto;}
+  .cal-note-add input{flex:1;}
+  .cal-note-empty{font-size:11.5px;color:var(--text-dim);text-align:center;padding:8px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translate(-50%,10px);
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    padding:9px 16px;border-radius:20px;font-size:12.5px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:9999;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+  <header class="app-header">
+    <div class="app-title">
+      <img src="logo.png" alt="XOS Tools Logo" width="25" height="25">
+      XOS Toolbox
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeToggle" title="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <nav class="sidebar" id="sidebar">
+      <button class="nav-btn active" data-tool="clipboard" title="Clipboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"></rect><rect x="9" y="2" width="6" height="4" rx="1"></rect><line x1="9" y1="11" x2="15" y2="11"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+      </button>
+      <button class="nav-btn" data-tool="color" title="Color Picker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c4 4.5 7 8 7 11.5A7 7 0 1 1 5 13.5C5 10 8 6.5 12 2z"></path></svg>
+      </button>
+      <button class="nav-btn" data-tool="shortcuts" title="Shortcuts Guide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"></rect><line x1="6" y1="10" x2="6" y2="10"></line><line x1="10" y1="10" x2="10" y2="10"></line><line x1="14" y1="10" x2="14" y2="10"></line><line x1="18" y1="10" x2="18" y2="10"></line><line x1="6" y1="14" x2="18" y2="14"></line></svg>
+      </button>
+      <button class="nav-btn" data-tool="notepad" title="Notepad">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
+      </button>
+      <button class="nav-btn" data-tool="extractor" title="Text Extractor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-5-5L5 21"></path></svg>
+      </button>
+      <button class="nav-btn" data-tool="calculator" title="Calculator">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="11" x2="8" y2="11"></line><line x1="12" y1="11" x2="12" y2="11"></line><line x1="16" y1="11" x2="16" y2="11"></line><line x1="8" y1="15" x2="8" y2="15"></line><line x1="12" y1="15" x2="12" y2="15"></line><line x1="16" y1="15" x2="16" y2="15"></line><line x1="8" y1="19" x2="8" y2="19"></line><line x1="12" y1="19" x2="12" y2="19"></line><line x1="16" y1="19" x2="16" y2="19"></line></svg>
+      </button>
+      <button class="nav-btn" data-tool="calendar" title="Calendar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      </button>
+    </nav>
+
+    <main class="content">
+
+      <!-- CLIPBOARD -->
+      <section class="tool-pane active" id="tool-clipboard">
+        <div class="pane-header"><h2>Clipboard History</h2></div>
+        <div class="clip-capture">
+          <textarea id="clipCaptureBox" placeholder="Click here, then Ctrl+V to capture…"></textarea>
+          <button class="btn-small" id="clipReadBtn" title="Read system clipboard">Read</button>
+        </div>
+        <div class="clip-columns">
+          <div class="clip-list" id="clipList"></div>
+          <div class="clip-detail">
+            <textarea id="clipDetail" readonly placeholder="Select an item on the left to see the full text here…"></textarea>
+            <div class="clip-detail-actions">
+              <button class="btn-primary" id="clipCopyBtn">Copy</button>
+              <button class="btn-danger" id="clipDeleteBtn">Delete</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn-link" id="clipClearAll">Clear all history</button>
+      </section>
+
+      <!-- COLOR PICKER -->
+      <section class="tool-pane" id="tool-color">
+        <div class="pane-header"><h2>Color Picker</h2></div>
+        <div class="color-preview" id="colorPreview"></div>
+        <div class="color-row">
+          <input type="text" id="hexInput" placeholder="#4FD1C5" maxlength="7">
+          <input type="color" id="colorNative" value="#4fd1c5">
+        </div>
+        <div class="color-values">
+          <div>RGB &nbsp;<span id="rgbValue">79, 209, 197</span></div>
+          <div>HSL &nbsp;<span id="hslValue">175°, 57%, 56%</span></div>
+        </div>
+        <div class="color-actions">
+          <button class="btn-primary" id="copyHexBtn">Copy Hex</button>
+          <button class="btn-small" id="eyedropBtn" hidden>Pick from screen</button>
+        </div>
+        <div class="pane-subheader">Recent</div>
+        <div class="color-recent" id="colorRecent"></div>
+      </section>
+
+      <!-- SHORTCUTS -->
+      <section class="tool-pane" id="tool-shortcuts">
+        <div class="pane-header"><h2>Windows Shortcuts</h2></div>
+        <input type="text" class="search-input" id="shortcutSearch" placeholder="Search shortcuts…">
+        <div class="shortcut-list" id="shortcutList"></div>
+      </section>
+
+      <!-- NOTEPAD -->
+      <section class="tool-pane" id="tool-notepad">
+        <div class="pane-header"><h2>Notepad</h2></div>
+        <div class="notepad-toolbar">
+          <select id="noteSelect"></select>
+          <button class="btn-small" id="noteAddBtn" title="New note">＋</button>
+          <button class="btn-small" id="noteDeleteBtn" title="Delete note">🗑</button>
+          <button class="btn-small" id="noteDownloadBtn" title="Download .txt">⭳</button>
+        </div>
+        <textarea id="noteText" class="notepad-textarea" placeholder="Start typing…"></textarea>
+        <div class="notepad-footer">
+          <span id="noteStats">0 words · 0 chars</span>
+          <span class="font-controls">
+            <button id="fontMinus">A−</button>
+            <button id="fontPlus">A+</button>
+          </span>
+          <span id="noteSaved" class="saved-indicator">Saved</span>
+        </div>
+      </section>
+
+      <!-- EXTRACTOR -->
+      <section class="tool-pane" id="tool-extractor">
+        <div class="pane-header"><h2>Text Extractor</h2></div>
+        <div class="drop-zone" id="dropZone">
+          <p>Drop an image, paste it (Ctrl+V), or</p>
+          <button class="btn-small" id="fileSelectBtn">Choose image file</button>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
+        <img id="extractPreview" class="extract-preview" hidden>
+        <div class="extract-progress" id="extractProgress" hidden>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <span id="progressLabel">Loading engine…</span>
+        </div>
+        <textarea class="extract-result" id="extractResult" readonly placeholder="Extracted text will appear here…"></textarea>
+        <div class="extract-actions">
+          <button class="btn-primary" id="extractCopyBtn">Copy Text</button>
+          <button class="btn-small" id="extractClearBtn">Clear</button>
+        </div>
+      </section>
+
+      <!-- CALCULATOR -->
+      <section class="tool-pane" id="tool-calculator">
+        <div class="pane-header"><h2>Calculator</h2></div>
+        <div class="calc-display">
+          <div class="calc-expr" id="calcExpr">&nbsp;</div>
+          <div class="calc-result" id="calcResult">0</div>
+        </div>
+        <div class="calc-grid" id="calcGrid">
+          <button data-act="mc">MC</button><button data-act="mr">MR</button><button data-act="m+">M+</button><button data-act="m-">M−</button>
+          <button data-act="clear">C</button><button data-act="ce">CE</button><button data-act="back">⌫</button><button class="op" data-op="/">÷</button>
+          <button data-num="7">7</button><button data-num="8">8</button><button data-num="9">9</button><button class="op" data-op="*">×</button>
+          <button data-num="4">4</button><button data-num="5">5</button><button data-num="6">6</button><button class="op" data-op="-">−</button>
+          <button data-num="1">1</button><button data-num="2">2</button><button data-num="3">3</button><button class="op" data-op="+">+</button>
+          <button data-act="sign">±</button><button data-num="0">0</button><button data-act="dot">.</button><button class="op eq" data-act="equals">=</button>
+          <button data-act="sqrt">√</button><button data-act="square">x²</button><button data-act="percent">%</button><button data-act="history" id="calcHistoryBtn">🕘</button>
+        </div>
+        <div class="calc-history" id="calcHistoryPanel" hidden></div>
+      </section>
+
+      <!-- CALENDAR -->
+      <section class="tool-pane" id="tool-calendar">
+        <div class="pane-header"><h2>Calendar</h2></div>
+        <div class="cal-nav">
+          <button id="calPrev">‹</button>
+          <span id="calLabel">Month Year</span>
+          <button id="calNext">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <button class="btn-link" id="calToday" style="align-self:center;margin-bottom:4px;">Jump to today</button>
+        <div class="cal-notes">
+          <div class="cal-selected-date" id="calSelectedDate"></div>
+          <div class="cal-note-list" id="calNoteList"></div>
+          <div class="cal-note-add">
+            <input type="text" id="calNoteInput" placeholder="Add a note for this day…">
+            <button class="btn-small" id="calNoteAddBtn">Add</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.2/tesseract.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ============ UTILITIES ============ */
+  const $ = id => document.getElementById(id);
+  const storage = {
+    get(key, fallback){
+      try{ const v = localStorage.getItem(key); return v===null ? fallback : JSON.parse(v); }
+      catch(e){ return fallback; }
+    },
+    set(key, val){
+      try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+    }
+  };
+
+  let toastTimer = null;
+  function toast(msg){
+    const el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+  }
+
+  async function copyText(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch(e){
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        return true;
+      }catch(e2){ return false; }
+    }
+  }
+
+  /* ============ THEME ============ */
+  const html = document.documentElement;
+  function applyTheme(t){
+    html.setAttribute('data-theme', t);
+    storage.set('toolbox_theme', t);
+  }
+  applyTheme(storage.get('toolbox_theme','dark'));
+  $('themeToggle').addEventListener('click', ()=>{
+    applyTheme(html.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+  });
+
+  /* ============ NAVIGATION ============ */
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const panes = document.querySelectorAll('.tool-pane');
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      navButtons.forEach(b=>b.classList.remove('active'));
+      panes.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      $('tool-'+btn.dataset.tool).classList.add('active');
+    });
+  });
+
+  /* ============ CLIPBOARD MANAGER (Ditto-style) ============ */
+  (function(){
+    const listEl = $('clipList');
+    const detailEl = $('clipDetail');
+    const captureBox = $('clipCaptureBox');
+    let history = storage.get('toolbox_clipboard', []);
+    let selectedId = history.length ? history[0].id : null;
+
+    function save(){ storage.set('toolbox_clipboard', history); }
+
+    function addEntry(text){
+      text = (text || '').replace(/\r\n/g,'\n');
+      if (!text.trim()) return;
+      if (history.length && history[0].text === text) { selectedId = history[0].id; render(); return; }
+      const entry = { id: Date.now()+'-'+Math.random().toString(36).slice(2,7), text, time: Date.now() };
+      history.unshift(entry);
+      if (history.length > 60) history = history.slice(0,60);
+      selectedId = entry.id;
+      save();
+      render();
+      toast('Added to clipboard history');
+    }
+
+    function render(){
+      listEl.innerHTML = '';
+      if (!history.length){
+        listEl.innerHTML = '<div class="clip-empty">No clipboard history yet.<br>Paste something above to start.</div>';
+        detailEl.value = '';
+        return;
+      }
+      history.forEach(item=>{
+        const btn = document.createElement('button');
+        btn.className = 'clip-item' + (item.id===selectedId ? ' selected' : '');
+        const preview = item.text.replace(/\s+/g,' ').trim().slice(0,70) || '(empty)';
+        btn.textContent = preview;
+        btn.title = preview;
+        btn.addEventListener('click', ()=>{ selectedId = item.id; render(); });
+        listEl.appendChild(btn);
+      });
+      const sel = history.find(h=>h.id===selectedId) || history[0];
+      selectedId = sel.id;
+      detailEl.value = sel.text;
+    }
+
+    captureBox.addEventListener('paste', (e)=>{
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      setTimeout(()=>{ captureBox.value=''; }, 0);
+      if (text) addEntry(text);
+      e.preventDefault();
+    });
+
+    $('clipReadBtn').addEventListener('click', async ()=>{
+      try{
+        const text = await navigator.clipboard.readText();
+        if (text) addEntry(text); else toast('Clipboard is empty');
+      }catch(e){
+        toast('Click the box above and press Ctrl+V instead');
+      }
+    });
+
+    $('clipCopyBtn').addEventListener('click', async ()=>{
+      if (!detailEl.value) return;
+      const ok = await copyText(detailEl.value);
+      toast(ok ? 'Copied to clipboard' : 'Copy failed');
+    });
+
+    $('clipDeleteBtn').addEventListener('click', ()=>{
+      if (!selectedId) return;
+      history = history.filter(h=>h.id!==selectedId);
+      selectedId = history.length ? history[0].id : null;
+      save();
+      render();
+    });
+
+    $('clipClearAll').addEventListener('click', ()=>{
+      if (!history.length) return;
+      if (!confirm('Clear all clipboard history?')) return;
+      history = [];
+      selectedId = null;
+      save();
+      render();
+    });
+
+    render();
+  })();
+
+  /* ============ COLOR PICKER ============ */
+  (function(){
+    const hexInput = $('hexInput');
+    const nativeInput = $('colorNative');
+    const preview = $('colorPreview');
+    const rgbValue = $('rgbValue');
+    const hslValue = $('hslValue');
+    const recentEl = $('colorRecent');
+    let recent = storage.get('toolbox_color_recent', []);
+
+    function normalizeHex(v){
+      v = v.trim();
+      if (!v.startsWith('#')) v = '#'+v;
+      if (/^#([0-9a-fA-F]{3})$/.test(v)){
+        v = '#' + v[1]+v[1]+v[2]+v[2]+v[3]+v[3];
+      }
+      return v;
+    }
+    function isValidHex(v){ return /^#[0-9a-fA-F]{6}$/.test(v); }
+
+    function hexToRgb(hex){
+      const n = parseInt(hex.slice(1), 16);
+      return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+    }
+    function rgbToHsl(r,g,b){
+      r/=255; g/=255; b/=255;
+      const max=Math.max(r,g,b), min=Math.min(r,g,b);
+      let h,s,l=(max+min)/2;
+      if (max===min){ h=s=0; }
+      else{
+        const d = max-min;
+        s = l>0.5 ? d/(2-max-min) : d/(max+min);
+        switch(max){
+          case r: h=(g-b)/d + (g<b?6:0); break;
+          case g: h=(b-r)/d + 2; break;
+          case b: h=(r-g)/d + 4; break;
+        }
+        h/=6;
+      }
+      return { h:Math.round(h*360), s:Math.round(s*100), l:Math.round(l*100) };
+    }
+
+    function applyColor(hex, opts){
+      opts = opts || {};
+      hex = normalizeHex(hex);
+      if (!isValidHex(hex)) return false;
+      preview.style.background = hex;
+      nativeInput.value = hex;
+      if (!opts.skipHexInput) hexInput.value = hex.toUpperCase();
+      const {r,g,b} = hexToRgb(hex);
+      const {h,s,l} = rgbToHsl(r,g,b);
+      rgbValue.textContent = `${r}, ${g}, ${b}`;
+      hslValue.textContent = `${h}°, ${s}%, ${l}%`;
+      if (opts.remember) rememberColor(hex);
+      return true;
+    }
+
+    function rememberColor(hex){
+      hex = hex.toUpperCase();
+      recent = recent.filter(c=>c!==hex);
+      recent.unshift(hex);
+      if (recent.length>12) recent = recent.slice(0,12);
+      storage.set('toolbox_color_recent', recent);
+      renderRecent();
+    }
+
+    function renderRecent(){
+      recentEl.innerHTML = '';
+      if (!recent.length){
+        recentEl.innerHTML = '<span style="font-size:11.5px;color:var(--text-dim);">No recent colors yet.</span>';
+        return;
+      }
+      recent.forEach(hex=>{
+        const sw = document.createElement('div');
+        sw.className = 'swatch';
+        sw.style.background = hex;
+        sw.title = hex;
+        sw.addEventListener('click', ()=>applyColor(hex));
+        recentEl.appendChild(sw);
+      });
+    }
+
+    hexInput.addEventListener('input', ()=>{
+      const v = normalizeHex(hexInput.value);
+      if (isValidHex(v)) applyColor(v, { skipHexInput:true });
+    });
+    hexInput.addEventListener('change', ()=>{
+      const v = normalizeHex(hexInput.value);
+      if (isValidHex(v)) applyColor(v, { remember:true });
+      else toast('Enter a valid hex code, e.g. #4FD1C5');
+    });
+    nativeInput.addEventListener('input', ()=>applyColor(nativeInput.value));
+    nativeInput.addEventListener('change', ()=>applyColor(nativeInput.value, { remember:true }));
+
+    $('copyHexBtn').addEventListener('click', async ()=>{
+      const v = normalizeHex(hexInput.value);
+      if (!isValidHex(v)){ toast('No valid color to copy'); return; }
+      const ok = await copyText(v.toUpperCase());
+      if (ok) rememberColor(v);
+      toast(ok ? 'Hex copied' : 'Copy failed');
+    });
+
+    if ('EyeDropper' in window){
+      const btn = $('eyedropBtn');
+      btn.hidden = false;
+      btn.addEventListener('click', async ()=>{
+        try{
+          const ed = new EyeDropper();
+          const result = await ed.open();
+          applyColor(result.sRGBHex, { remember:true });
+        }catch(e){ /* user cancelled */ }
+      });
+    }
+
+    applyColor('#4FD1C5', { remember:false });
+    renderRecent();
+  })();
+
+  /* ============ SHORTCUTS GUIDE ============ */
+  (function(){
+    const data = [
+      { cat:'Window Management', items:[
+        ['Win + E','Open File Explorer'],
+        ['Win + D','Show/hide desktop'],
+        ['Win + M','Minimize all windows'],
+        ['Win + Shift + M','Restore minimized windows'],
+        ['Win + Up','Maximize window'],
+        ['Win + Down','Minimize/restore window'],
+        ['Win + Left / Right','Snap window to side'],
+        ['Win + Shift + Left/Right','Move window to other monitor'],
+        ['Alt + Tab','Switch between open windows'],
+        ['Alt + F4','Close current window'],
+        ['Win + Tab','Task view'],
+      ]},
+      { cat:'Virtual Desktops', items:[
+        ['Win + Ctrl + D','Add new virtual desktop'],
+        ['Win + Ctrl + F4','Close current virtual desktop'],
+        ['Win + Ctrl + Left/Right','Switch virtual desktops'],
+      ]},
+      { cat:'System', items:[
+        ['Win + L','Lock the PC'],
+        ['Win + I','Open Settings'],
+        ['Win + A','Open Action/Quick settings center'],
+        ['Win + N','Open Notification center'],
+        ['Win + X','Open Quick Link (power user) menu'],
+        ['Win + R','Open the Run dialog'],
+        ['Win + Pause','Open System properties'],
+        ['Ctrl + Shift + Esc','Open Task Manager'],
+        ['Ctrl + Alt + Del','Security / lock options'],
+      ]},
+      { cat:'Search & Launch', items:[
+        ['Win + S','Open Search'],
+        ['Win + Q','Open Search (Quick)'],
+        ['Win (tap)','Open Start menu'],
+        ['Win + number','Launch pinned taskbar app'],
+      ]},
+      { cat:'Screenshots', items:[
+        ['Win + Shift + S','Open Snipping tool / snip area'],
+        ['Win + PrtScn','Save full screenshot to Pictures'],
+        ['Alt + PrtScn','Copy screenshot of active window'],
+        ['Win + G','Open Xbox Game Bar (clip/record)'],
+      ]},
+      { cat:'File Explorer', items:[
+        ['Ctrl + N','New Explorer window'],
+        ['Ctrl + Shift + N','New folder'],
+        ['F2','Rename selected item'],
+        ['Alt + Enter','Open properties'],
+        ['Alt + Up','Go up one folder level'],
+      ]},
+      { cat:'Text Editing', items:[
+        ['Ctrl + C / X / V','Copy / cut / paste'],
+        ['Ctrl + Z / Y','Undo / redo'],
+        ['Ctrl + A','Select all'],
+        ['Ctrl + B / I / U','Bold / italic / underline'],
+        ['Ctrl + Left/Right','Jump one word'],
+        ['Ctrl + Backspace','Delete previous word'],
+        ['Win + .','Open emoji panel'],
+      ]},
+      { cat:'Browser', items:[
+        ['Ctrl + T','New tab'],
+        ['Ctrl + Shift + T','Reopen closed tab'],
+        ['Ctrl + W','Close tab'],
+        ['Ctrl + Tab','Next tab'],
+        ['Ctrl + L','Focus address bar'],
+        ['Ctrl + Shift + N','New private/incognito window'],
+        ['F5 / Ctrl + R','Reload page'],
+      ]},
+      { cat:'Accessibility', items:[
+        ['Win + "+" / "-"','Zoom in / out (Magnifier)'],
+        ['Win + Ctrl + Enter','Toggle Narrator'],
+        ['Win + U','Open Accessibility settings'],
+      ]},
+    ];
+
+    const listEl = $('shortcutList');
+    function render(filter){
+      filter = (filter||'').toLowerCase().trim();
+      listEl.innerHTML = '';
+      let any = false;
+      data.forEach(group=>{
+        const items = group.items.filter(([keys,desc])=>
+          !filter || keys.toLowerCase().includes(filter) || desc.toLowerCase().includes(filter));
+        if (!items.length) return;
+        any = true;
+        const cat = document.createElement('div');
+        cat.className = 'sc-cat';
+        cat.textContent = group.cat;
+        listEl.appendChild(cat);
+        items.forEach(([keys,desc])=>{
+          const row = document.createElement('div');
+          row.className = 'sc-row';
+          const keysHtml = keys.split(' + ').map(k=>`<kbd>${k}</kbd>`).join('<span style="color:var(--text-dim);font-size:10px;">+</span>');
+          row.innerHTML = `<span class="sc-desc">${desc}</span><span class="sc-keys">${keysHtml}</span>`;
+          listEl.appendChild(row);
+        });
+      });
+      if (!any){
+        listEl.innerHTML = '<div class="sc-empty">No shortcuts match your search.</div>';
+      }
+    }
+    $('shortcutSearch').addEventListener('input', e=>render(e.target.value));
+    render('');
+  })();
+
+  /* ============ NOTEPAD ============ */
+  (function(){
+    let notes = storage.get('toolbox_notes', null);
+    if (!notes || !notes.length){
+      notes = [{ id:'n1', title:'Note 1', text:'' }];
+    }
+    let activeId = storage.get('toolbox_notes_active', notes[0].id);
+    if (!notes.find(n=>n.id===activeId)) activeId = notes[0].id;
+    let fontSize = storage.get('toolbox_notes_fontsize', 13);
+
+    const selectEl = $('noteSelect');
+    const textEl = $('noteText');
+    const statsEl = $('noteStats');
+    const savedEl = $('noteSaved');
+    let saveTimer = null;
+
+    function persist(){
+      storage.set('toolbox_notes', notes);
+      storage.set('toolbox_notes_active', activeId);
+    }
+
+    function renderSelect(){
+      selectEl.innerHTML = '';
+      notes.forEach(n=>{
+        const opt = document.createElement('option');
+        opt.value = n.id; opt.textContent = n.title;
+        if (n.id===activeId) opt.selected = true;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    function loadActive(){
+      const n = notes.find(n=>n.id===activeId);
+      textEl.value = n ? n.text : '';
+      textEl.style.fontSize = fontSize+'px';
+      updateStats();
+    }
+
+    function updateStats(){
+      const text = textEl.value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      statsEl.textContent = `${words} word${words!==1?'s':''} · ${text.length} char${text.length!==1?'s':''}`;
+    }
+
+    function showSaved(){
+      savedEl.classList.add('show');
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(()=>savedEl.classList.remove('show'), 900);
+    }
+
+    textEl.addEventListener('input', ()=>{
+      const n = notes.find(n=>n.id===activeId);
+      if (n) n.text = textEl.value;
+      updateStats();
+      persist();
+      showSaved();
+    });
+
+    selectEl.addEventListener('change', ()=>{
+      activeId = selectEl.value;
+      loadActive();
+      persist();
+    });
+
+    $('noteAddBtn').addEventListener('click', ()=>{
+      const id = 'n'+Date.now();
+      const title = 'Note ' + (notes.length+1);
+      notes.push({ id, title, text:'' });
+      activeId = id;
+      renderSelect();
+      loadActive();
+      persist();
+    });
+
+    $('noteDeleteBtn').addEventListener('click', ()=>{
+      if (notes.length<=1){ toast("Can't delete your only note"); return; }
+      if (!confirm('Delete this note?')) return;
+      notes = notes.filter(n=>n.id!==activeId);
+      activeId = notes[0].id;
+      renderSelect();
+      loadActive();
+      persist();
+    });
+
+    $('noteDownloadBtn').addEventListener('click', ()=>{
+      const n = notes.find(n=>n.id===activeId);
+      const blob = new Blob([n ? n.text : ''], { type:'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = (n ? n.title : 'note') + '.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    $('fontMinus').addEventListener('click', ()=>{
+      fontSize = Math.max(10, fontSize-1);
+      textEl.style.fontSize = fontSize+'px';
+      storage.set('toolbox_notes_fontsize', fontSize);
+    });
+    $('fontPlus').addEventListener('click', ()=>{
+      fontSize = Math.min(24, fontSize+1);
+      textEl.style.fontSize = fontSize+'px';
+      storage.set('toolbox_notes_fontsize', fontSize);
+    });
+
+    renderSelect();
+    loadActive();
+  })();
+
+  /* ============ TEXT EXTRACTOR (OCR) ============ */
+  (function(){
+    const dropZone = $('dropZone');
+    const fileInput = $('fileInput');
+    const preview = $('extractPreview');
+    const progress = $('extractProgress');
+    const progressFill = $('progressFill');
+    const progressLabel = $('progressLabel');
+    const resultEl = $('extractResult');
+
+    let worker = null;
+    let workerReady = false;
+
+    async function getWorker(){
+      if (worker) return worker;
+      progress.hidden = false;
+      progressLabel.textContent = 'Loading OCR engine…';
+      progressFill.style.width = '10%';
+      worker = await Tesseract.createWorker('eng', 1, {
+        logger: m=>{
+          if (m.status === 'recognizing text' && typeof m.progress === 'number'){
+            progressFill.style.width = Math.round(m.progress*100)+'%';
+            progressLabel.textContent = 'Reading text… ' + Math.round(m.progress*100) + '%';
+          } else if (m.status){
+            progressLabel.textContent = m.status.charAt(0).toUpperCase()+m.status.slice(1)+'…';
+          }
+        }
+      });
+      workerReady = true;
+      return worker;
+    }
+
+    function downscale(img, maxDim){
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim){
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width*scale);
+        height = Math.round(height*scale);
+      }
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      return canvas;
+    }
+
+    async function runOCR(dataUrl){
+      resultEl.value = '';
+      progress.hidden = false;
+      progressFill.style.width = '5%';
+      progressLabel.textContent = 'Preparing image…';
+
+      const img = new Image();
+      img.onload = async ()=>{
+        try{
+          const canvas = downscale(img, 1400);
+          const w = await getWorker();
+          const { data } = await w.recognize(canvas);
+          resultEl.value = (data.text || '').trim();
+          progressFill.style.width = '100%';
+          progressLabel.textContent = 'Done';
+          setTimeout(()=>{ progress.hidden = true; }, 700);
+          if (!resultEl.value) toast('No text found in image');
+        }catch(err){
+          progress.hidden = true;
+          toast('Could not read text from that image');
+        }
+      };
+      img.src = dataUrl;
+    }
+
+    function loadFile(file){
+      if (!file || !file.type.startsWith('image/')) { toast('Please use an image file'); return; }
+      const reader = new FileReader();
+      reader.onload = e=>{
+        preview.src = e.target.result;
+        preview.hidden = false;
+        runOCR(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    $('fileSelectBtn').addEventListener('click', ()=>fileInput.click());
+    fileInput.addEventListener('change', ()=>{
+      if (fileInput.files[0]) loadFile(fileInput.files[0]);
+    });
+
+    ['dragenter','dragover'].forEach(evt=>{
+      dropZone.addEventListener(evt, e=>{ e.preventDefault(); dropZone.classList.add('drag'); });
+    });
+    ['dragleave','drop'].forEach(evt=>{
+      dropZone.addEventListener(evt, e=>{ e.preventDefault(); dropZone.classList.remove('drag'); });
+    });
+    dropZone.addEventListener('drop', e=>{
+      const file = e.dataTransfer.files[0];
+      if (file) loadFile(file);
+    });
+
+    document.addEventListener('paste', e=>{
+      if (!$('tool-extractor').classList.contains('active')) return;
+      const items = (e.clipboardData || {}).items || [];
+      for (const item of items){
+        if (item.type && item.type.startsWith('image/')){
+          const file = item.getAsFile();
+          if (file) loadFile(file);
+          e.preventDefault();
+          break;
+        }
+      }
+    });
+
+    $('extractCopyBtn').addEventListener('click', async ()=>{
+      if (!resultEl.value){ toast('Nothing to copy yet'); return; }
+      const ok = await copyText(resultEl.value);
+      toast(ok ? 'Text copied' : 'Copy failed');
+    });
+    $('extractClearBtn').addEventListener('click', ()=>{
+      resultEl.value = '';
+      preview.hidden = true;
+      preview.src = '';
+      fileInput.value = '';
+    });
+  })();
+
+  /* ============ CALCULATOR ============ */
+  (function(){
+    const exprEl = $('calcExpr');
+    const resultEl = $('calcResult');
+    const histPanel = $('calcHistoryPanel');
+
+    let current = '0';
+    let previous = null;
+    let operator = null;
+    let overwrite = true;
+    let memory = 0;
+    let history = [];
+
+    const OP_SYMBOL = { '+':'+', '-':'−', '*':'×', '/':'÷' };
+
+    function fmt(n){
+      if (!isFinite(n)) return 'Error';
+      const s = parseFloat(n.toPrecision(12)).toString();
+      return s;
+    }
+
+    function updateDisplay(){
+      resultEl.textContent = current;
+      exprEl.textContent = (previous!==null && operator)
+        ? `${fmt(previous)} ${OP_SYMBOL[operator]}`
+        : '\u00A0';
+    }
+
+    function inputDigit(d){
+      if (overwrite){ current = (d==='.') ? '0.' : d; overwrite = false; return; }
+      if (d==='.' && current.includes('.')) return;
+      if (current==='0' && d!=='.') current = d;
+      else current += d;
+    }
+
+    function compute(){
+      if (operator===null || previous===null) return;
+      const a = previous, b = parseFloat(current);
+      let r;
+      switch(operator){
+        case '+': r = a+b; break;
+        case '-': r = a-b; break;
+        case '*': r = a*b; break;
+        case '/': r = b===0 ? NaN : a/b; break;
+        default: r = b;
+      }
+      const entry = `${fmt(a)} ${OP_SYMBOL[operator]} ${fmt(b)} = ${fmt(r)}`;
+      history.unshift(entry);
+      if (history.length>40) history = history.slice(0,40);
+      current = fmt(r);
+      previous = null;
+      operator = null;
+      overwrite = true;
+    }
+
+    function chooseOperator(op){
+      if (operator!==null && !overwrite) compute();
+      previous = parseFloat(current);
+      operator = op;
+      overwrite = true;
+    }
+
+    function act(action){
+      switch(action){
+        case 'clear': current='0'; previous=null; operator=null; overwrite=true; break;
+        case 'ce': current='0'; overwrite=true; break;
+        case 'back':
+          if (overwrite) break;
+          current = current.length>1 ? current.slice(0,-1) : '0';
+          if (current==='-') current='0';
+          if (current==='') { current='0'; overwrite=true; }
+          break;
+        case 'sign': current = (parseFloat(current)*-1).toString(); break;
+        case 'dot': inputDigit('.'); break;
+        case 'sqrt': current = fmt(Math.sqrt(parseFloat(current))); overwrite=true; break;
+        case 'square': current = fmt(Math.pow(parseFloat(current),2)); overwrite=true; break;
+        case 'percent':
+          current = fmt(previous!==null ? (previous * parseFloat(current))/100 : parseFloat(current)/100);
+          overwrite = true;
+          break;
+        case 'equals': compute(); break;
+        case 'mc': memory = 0; toast('Memory cleared'); break;
+        case 'mr': current = fmt(memory); overwrite = true; break;
+        case 'm+': memory += parseFloat(current); toast('Added to memory'); break;
+        case 'm-': memory -= parseFloat(current); toast('Subtracted from memory'); break;
+        case 'history': histPanel.hidden = !histPanel.hidden; renderHistory(); break;
+      }
+      updateDisplay();
+    }
+
+    function renderHistory(){
+      if (histPanel.hidden) return;
+      histPanel.innerHTML = '';
+      if (!history.length){
+        histPanel.innerHTML = '<div class="calc-hist-empty">No calculations yet</div>';
+        return;
+      }
+      history.forEach(h=>{
+        const row = document.createElement('div');
+        row.className = 'calc-hist-row';
+        row.textContent = h;
+        row.addEventListener('click', ()=>{
+          const val = h.split('=').pop().trim();
+          current = val; overwrite = true; updateDisplay();
+        });
+        histPanel.appendChild(row);
+      });
+    }
+
+    document.getElementById('calcGrid').addEventListener('click', e=>{
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.dataset.num!==undefined){ inputDigit(btn.dataset.num); updateDisplay(); }
+      else if (btn.dataset.op){ chooseOperator(btn.dataset.op); updateDisplay(); }
+      else if (btn.dataset.act){ act(btn.dataset.act); }
+    });
+
+    document.addEventListener('keydown', e=>{
+      if (!$('tool-calculator').classList.contains('active')) return;
+      if (e.key>='0' && e.key<='9'){ inputDigit(e.key); updateDisplay(); }
+      else if (['+','-','*','/'].includes(e.key)){ chooseOperator(e.key); updateDisplay(); }
+      else if (e.key==='.'){ inputDigit('.'); updateDisplay(); }
+      else if (e.key==='Enter' || e.key==='='){ e.preventDefault(); act('equals'); }
+      else if (e.key==='Backspace'){ act('back'); }
+      else if (e.key==='Escape'){ act('clear'); }
+      else if (e.key==='%'){ act('percent'); }
+    });
+
+    updateDisplay();
+  })();
+
+  /* ============ CALENDAR ============ */
+  (function(){
+    const gridEl = $('calGrid');
+    const labelEl = $('calLabel');
+    const noteListEl = $('calNoteList');
+    const selDateEl = $('calSelectedDate');
+    const noteInput = $('calNoteInput');
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+    let today = new Date();
+    let viewYear = today.getFullYear();
+    let viewMonth = today.getMonth();
+    let selected = fmtDate(today);
+
+    let notesData = storage.get('toolbox_calendar', {});
+
+    function fmtDate(d){
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    }
+
+    function render(){
+      labelEl.textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+      gridEl.innerHTML = '';
+      DOWS.forEach(d=>{
+        const el = document.createElement('div');
+        el.className = 'cal-dow';
+        el.textContent = d;
+        gridEl.appendChild(el);
+      });
+
+      const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+      const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+      const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+      const cells = [];
+      for (let i=firstDay-1; i>=0; i--){
+        cells.push({ day: daysInPrevMonth-i, other:true, date:new Date(viewYear, viewMonth-1, daysInPrevMonth-i) });
+      }
+      for (let d=1; d<=daysInMonth; d++){
+        cells.push({ day:d, other:false, date:new Date(viewYear, viewMonth, d) });
+      }
+      let nextDay = 1;
+      while (cells.length % 7 !== 0){
+        cells.push({ day:nextDay, other:true, date:new Date(viewYear, viewMonth+1, nextDay) });
+        nextDay++;
+      }
+
+      cells.forEach(c=>{
+        const key = fmtDate(c.date);
+        const el = document.createElement('div');
+        el.className = 'cal-day' + (c.other?' other':'') + (key===fmtDate(today)?' today':'') + (key===selected?' selected':'');
+        el.innerHTML = `<span>${c.day}</span>`;
+        if (notesData[key] && notesData[key].length){
+          const dot = document.createElement('div');
+          dot.className = 'dot';
+          el.appendChild(dot);
+        }
+        el.addEventListener('click', ()=>{
+          selected = key;
+          if (c.other){
+            viewYear = c.date.getFullYear();
+            viewMonth = c.date.getMonth();
+          }
+          render();
+        });
+        gridEl.appendChild(el);
+      });
+
+      renderNotes();
+    }
+
+    function renderNotes(){
+      const d = new Date(selected+'T00:00:00');
+      selDateEl.textContent = d.toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      const notes = notesData[selected] || [];
+      noteListEl.innerHTML = '';
+      if (!notes.length){
+        noteListEl.innerHTML = '<div class="cal-note-empty">No notes for this day.</div>';
+        return;
+      }
+      notes.forEach((n, idx)=>{
+        const row = document.createElement('div');
+        row.className = 'cal-note-row';
+        row.innerHTML = `<span></span><button title="Delete">✕</button>`;
+        row.querySelector('span').textContent = n;
+        row.querySelector('button').addEventListener('click', ()=>{
+          notesData[selected].splice(idx,1);
+          if (!notesData[selected].length) delete notesData[selected];
+          storage.set('toolbox_calendar', notesData);
+          render();
+        });
+        noteListEl.appendChild(row);
+      });
+    }
+
+    $('calPrev').addEventListener('click', ()=>{
+      viewMonth--; if (viewMonth<0){ viewMonth=11; viewYear--; }
+      render();
+    });
+    $('calNext').addEventListener('click', ()=>{
+      viewMonth++; if (viewMonth>11){ viewMonth=0; viewYear++; }
+      render();
+    });
+    $('calToday').addEventListener('click', ()=>{
+      today = new Date();
+      viewYear = today.getFullYear(); viewMonth = today.getMonth();
+      selected = fmtDate(today);
+      render();
+    });
+    $('calNoteAddBtn').addEventListener('click', addNote);
+    noteInput.addEventListener('keydown', e=>{ if (e.key==='Enter') addNote(); });
+    function addNote(){
+      const text = noteInput.value.trim();
+      if (!text) return;
+      if (!notesData[selected]) notesData[selected] = [];
+      notesData[selected].push(text);
+      storage.set('toolbox_calendar', notesData);
+      noteInput.value = '';
+      render();
+    }
+
+    render();
+  })();
+
+})();
+</script>
+</body>
+</html>
